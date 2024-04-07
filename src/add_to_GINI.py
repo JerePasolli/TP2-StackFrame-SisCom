@@ -8,7 +8,7 @@ libaddToGINI = ctypes.CDLL('./lib/libaddToGINI.so')
 libaddToGINI.add_one.argtypes = (ctypes.c_float,)
 
 # Definimos el tipo del retorno de la función
-libaddToGINI.add_one.restype = (ctypes.c_float)
+libaddToGINI.add_one.restype = (ctypes.c_int)
 
 # hace de Wrapper para llamar a la función de C
 

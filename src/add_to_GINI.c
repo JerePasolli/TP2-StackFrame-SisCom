@@ -1,3 +1,3 @@
-float add_one(float n) {
-    return n + 1;
+int add_one(float n) {
+    return (int) n + 1;
 }
