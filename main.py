@@ -11,7 +11,7 @@ ENDPOINT = 'https://api.worldbank.org/v2/en/country/all/indicator/SI.POV.GINI?fo
 
 # ---------------------------- Función que obtiene el indice GINI de la API y lo grafica ------------------------------- #
 
-def consult_and_graphic():
+def consult_and_graphic(event=None):
     
     country_requested = user_input.get() # obtencion de input de usuario
     
@@ -75,5 +75,12 @@ user_input.pack(padx=10, pady=5)
 
 confirm_button = Button(window, text = "Consultar GINI", highlightthickness=0, command=consult_and_graphic)
 confirm_button.pack(pady=10)
+
+window.bind('<Return>', consult_and_graphic)
+
+def close_window():
+    window.quit()
+
+window.protocol("WM_DELETE_WINDOW", close_window)
 
 window.mainloop()

@@ -29,19 +29,11 @@ Las librerías de Python necesarias son `ctypes`, `imagetk`, `tkinter` y `reques
 
 ```bash
 $ pip3 install requests
-$ pip3 install ctypes
 $ pip3 install tkinter
+$ pip3 install matplotlib
+$ sudo apt install python3-tk
 $ sudo apt-get install python3-pil python3-pil.imagetk
 ```
-
-En caso de que falle la instalación de la librería tkinter, se puede probar en sistemas operativos basados en Debian el siguiente comando:
-
-```bash
-$ sudo apt install python3-tk
-```
-
-Otra dependencia importante a instalar es 
-
 ### Compilación y ejecución
 
 Para compilar el programa (es decir la librería dinámica de C en este caso), se debe correr el script build.sh, ubicado en el directorio raíz del proyecto, de la siguiente manera:
@@ -70,3 +62,7 @@ Una vez escrito el país que se desea consultar, se debe clickear el botón "Con
 ![Gráfico del índice GINI](./img/img3.png)
 
 Posteriormente, se puede ingresar otro país en el cuadro de texto, y el gráfico se actualizará automáticamente con los datos del nuevo país ingresado.
+
+En caso de que se ingrese un país del cual no se tienen datos o una cadena de texto inválida elgráfico quedará en blanco, indicando la falta de datos GINI para ese país ingresado o cadena inválida.
+
+![Gráfico del índice GINI en blanco](./img/img4.png)
