@@ -25,13 +25,22 @@ $ sudo apt install build-essential nasm gcc-multilib g++-multilib
 $ sudo apt install python3
 ```
 
-Las librerías de Python necesarias son `ctypes`, `tkinter` y `request`. Se pueden instalar de la siguiente manera:
+Las librerías de Python necesarias son `ctypes`, `imagetk`, `tkinter` y `request`. Se pueden instalar de la siguiente manera:
 
 ```bash
 $ pip3 install requests
 $ pip3 install ctypes
 $ pip3 install tkinter
+$ sudo apt-get install python3-pil python3-pil.imagetk
 ```
+
+En caso de que falle la instalación de la librería tkinter, se puede probar en sistemas operativos basados en Debian el siguiente comando:
+
+```bash
+$ sudo apt install python3-tk
+```
+
+Otra dependencia importante a instalar es 
 
 ### Compilación y ejecución
 
