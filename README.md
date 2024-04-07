@@ -52,5 +52,21 @@ $ ./build.sh
 Una vez compilada la librería de C necesaria, se puede ejecutar el programa con el siguiente comando (desde el directorio raíz del proyecto):
 
 ```bash
-$ python3 ./src/main.py
+$ python3 ./main.py
 ```
+
+### Ejecución del programa
+
+El diagrama de secuencia del programa es el siguiente:
+
+![Diagrama de secuencia](./img/img1.jpg)
+
+Al correr el programa se ejecutará una interfaz gráfica que solictará que ingrese se el país para el cual desee obtener la informacíon del índice GINI, de la siguiente manera:
+
+![Primer pantalla de usuario](./img/img2.png)
+
+Una vez escrito el país que se desea consultar, se debe clickear el botón "Consultar GINI", con lo cual se generará un gráfico con los datos del índice GINI disponibles desde el año 2011 hasta el 2020:
+
+![Gráfico del índice GINI](./img/img3.png)
+
+Posteriormente, se puede ingresar otro país en el cuadro de texto, y el gráfico se actualizará automáticamente con los datos del nuevo país ingresado.
