@@ -43,5 +43,5 @@ $ ./build.sh
 Una vez compilada la librería de C necesaria, se puede ejecutar el programa con el siguiente comando (desde el directorio raíz del proyecto):
 
 ```bash
-$ python3 ./main.py
+$ python3 ./src/main.py
 ```

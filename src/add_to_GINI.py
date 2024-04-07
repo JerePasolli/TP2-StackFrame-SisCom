@@ -2,7 +2,7 @@
 import ctypes
 
 # Cargamos la libreria 
-libaddToGINI = ctypes.CDLL('./libaddToGINI.so')
+libaddToGINI = ctypes.CDLL('./lib/libaddToGINI.so')
 
 # Definimos los tipos de los argumentos de la función factorial
 libaddToGINI.add_one.argtypes = (ctypes.c_float,)
