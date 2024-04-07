@@ -1,5 +1,4 @@
-
-from add_to_GINI import add_one
+from src.add_to_GINI import add_one
 import requests
 import matplotlib.pyplot as plt
 from tkinter import *
@@ -9,8 +8,6 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 # ---------------------------- Constantes ------------------------------- #
 
 ENDPOINT = 'https://api.worldbank.org/v2/en/country/all/indicator/SI.POV.GINI?format=json&date=2011:2020&per_page=32500&page=1&country=%22Argentina%22'
-
-
 
 # ---------------------------- Función que obtiene el indice GINI de la API y lo grafica ------------------------------- #
 
@@ -31,7 +28,7 @@ def consult_and_graphic():
                                     "date": gini["date"]}) # filtrado de respuesta de la API para obtener pais que pidio el usuario
             
     
-    # Limpiar el gráfico anterior
+    # Limpiar el gráfico anterior (en caso de que haya consultas consecutivas)
     if hasattr(consult_and_graphic, 'graph_widget'):
         consult_and_graphic.graph_widget.pack_forget()
         
@@ -44,7 +41,6 @@ def consult_and_graphic():
     
     fig, ax = plt.subplots()
     
-    #plt.figure(figsize=(8, 6))
     ax.plot(x, y, marker='o', linestyle='-')
     ax.plot(x1, y1, marker='o', linestyle=':')
     
