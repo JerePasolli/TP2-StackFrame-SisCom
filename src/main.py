@@ -3,11 +3,14 @@ from add_to_GINI import add_one
 import requests
 import matplotlib.pyplot as plt
 from tkinter import *
+from tkinter import ttk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 # ---------------------------- Constantes ------------------------------- #
 
 ENDPOINT = 'https://api.worldbank.org/v2/en/country/all/indicator/SI.POV.GINI?format=json&date=2011:2020&per_page=32500&page=1&country=%22Argentina%22'
+
+
 
 # ---------------------------- Función que obtiene el indice GINI de la API y lo grafica ------------------------------- #
 
@@ -28,6 +31,10 @@ def consult_and_graphic():
                                     "date": gini["date"]}) # filtrado de respuesta de la API para obtener pais que pidio el usuario
             
     
+    # Limpiar el gráfico anterior
+    if hasattr(consult_and_graphic, 'graph_widget'):
+        consult_and_graphic.graph_widget.pack_forget()
+        
     # creación y dibujado del gráfico de indice GINI e indice GINI+1
     x = [item["date"] for item in country_selected]  
     y = [item["value"] for item in country_selected]
@@ -35,21 +42,22 @@ def consult_and_graphic():
     x1 = [item["date"] for item in country_selected]  
     y1 = [add_one(item["value"]) for item in country_selected]
     
-    fig = plt.figure(figsize=(8, 6))
-    plt.plot(x, y, marker='o', linestyle='-')
-    plt.plot(x1, y1, marker='o', linestyle=':')
+    fig, ax = plt.subplots()
+    
+    #plt.figure(figsize=(8, 6))
+    ax.plot(x, y, marker='o', linestyle='-')
+    ax.plot(x1, y1, marker='o', linestyle=':')
     
     for i, (xi, yi) in enumerate(zip(x, y)):
-        plt.annotate(f'({xi}, {yi})', (xi, yi), textcoords="offset points", xytext=(0, 10), ha='center')
+        ax.annotate(f'({xi}, {yi})', (xi, yi), textcoords="offset points", xytext=(0, 10), ha='center')
     
-    plt.title('GINI INDEX')
-    plt.xlabel('Year')
-    plt.ylabel('GINI value')
+    ax.set_title('GINI INDEX')
+    ax.set_xlabel('Year')
+    ax.set_ylabel('GINI value')
     
-    plt.grid(True)
-    
-    graph = FigureCanvasTkAgg(plt.gcf(), window)
-    graph.get_tk_widget().pack(side=BOTTOM, fill=BOTH, expand=True) # se agrega a la ventada de tkinter para mostrar al usuario
+    graph = FigureCanvasTkAgg(fig, window)
+    consult_and_graphic.graph_widget = graph.get_tk_widget()
+    consult_and_graphic.graph_widget.pack(side=BOTTOM, fill=BOTH, expand=True, padx=10, pady=10)
 
 # ---------------------------- GUI ------------------------------- #
 
@@ -57,13 +65,19 @@ window = Tk()
 window.title("Graficador de índice GINI")
 window.config(padx=100, pady=50)
 
-text_label = Label(window, text="Escriba el nombre del pais del cual desea obtener el indice GINI: ")
-text_label.pack()
+s = ttk.Style()
+s.configure('TButton', background='#4CAF50', foreground='#FFFFFF', padding=10)
+
+text_label0 = Label(window, text="Graficador de indice GINI", font=('Arial', 20, 'bold'))
+text_label0.pack(pady=10)
+
+text_label = Label(window, text="Escriba el nombre del pais del cual desea graficar el indice GINI: ", font=('Arial', 14, 'normal'))
+text_label.pack(pady=10)
 
 user_input = Entry(window)
-user_input.pack()
+user_input.pack(padx=10, pady=5)
 
 confirm_button = Button(window, text = "Consultar GINI", highlightthickness=0, command=consult_and_graphic)
-confirm_button.pack()
+confirm_button.pack(pady=10)
 
 window.mainloop()
