@@ -5,12 +5,12 @@ import ctypes
 libaddToGINI = ctypes.CDLL('./lib/libaddToGINI.so')
 
 # Definimos los tipos de los argumentos de la función
-libaddToGINI.add_one.argtypes = (ctypes.c_float,)
+libaddToGINI.add_one_python.argtypes = (ctypes.c_float,)
 
 # Definimos el tipo del retorno de la función
-libaddToGINI.add_one.restype = (ctypes.c_int)
+libaddToGINI.add_one_python.restype = (ctypes.c_int)
 
 # hace de Wrapper para llamar a la función de C
 
-def add_one(num):
-    return libaddToGINI.add_one(num)  
+def add_one_python(num):
+    return libaddToGINI.add_one_python(num)  

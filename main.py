@@ -1,4 +1,4 @@
-from src.add_to_GINI import add_one
+from src.add_to_GINI import add_one_python
 import requests
 import matplotlib.pyplot as plt
 from tkinter import *
@@ -37,7 +37,7 @@ def consult_and_graphic(event=None):
     y = [item["value"] for item in country_selected]
 
     x1 = [item["date"] for item in country_selected]  
-    y1 = [add_one(item["value"]) for item in country_selected]
+    y1 = [add_one_python(item["value"]) for item in country_selected]
     
     fig, ax = plt.subplots()
     
