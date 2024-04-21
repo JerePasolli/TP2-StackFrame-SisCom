@@ -8,7 +8,7 @@ Se debe diseñar e implementar una interfaz que muestre el índice GINI. La capa
 
 Se debe utilizar el stack para convocar, enviar parámetros y devolver resultados. O sea utilizar las convenciones de llamadas de lenguajes de alto nivel a bajo nivel.
 
-En una primera iteración resolverán todo el trabajo práctico usando C con Python sin ensamblador. En la siguiente iteración usarán los conocimientos de ensamblador para completar el tp.
+En una primera iteración resolverán todo el trabajo práctico usando C con Python sin ensamblador. En la siguiente iteración usarán los conocimientos de ensamblador para completar el tp lo cual ya se encuentra implementado.
 
 IMPORTANTE: en esta segunda iteración deberán mostrar los resultados con gdb, para ello pueden usar un programa de C puro. Cuando depuren muestran el estado del área de memoria que contiene el stack antes, durante y después de la función.
 
@@ -77,3 +77,70 @@ En este recuadro se pueden ver dos gráficos superpuestos. La línea azul corres
 En caso de que se ingrese un país del cual no se tienen datos o una cadena de texto inválida elgráfico quedará en blanco, indicando la falta de datos GINI para ese país ingresado o cadena inválida.
 
 ![Gráfico del índice GINI en blanco](./img/img4.png)
+
+### Implementación de código assembler y depuración del programa
+Se realizó un script de bash para compilar nuestro programa con flag de compilacion, para hacer la depuracion se realizo un programa main en c que ejecutará la funcion en c y la implementacion en assembly.
+
+script para realizar el build:
+```bash
+$ ./build_gdb.sh
+```
+codigo assembly:
+```assembly
+    section .data                       ; para los datos
+        num dd 0                        ; 4 bytes inicializados en 0
+
+    global asm_main                     ; define a la funcion como global para poder accederla
+    section .text                       ; seccion de codigo     
+
+    asm_main:
+        push ebp                        ; guarda valor en la pila
+        mov ebp, esp                    ; ebp = esp
+        fld dword [esp + 8]             ; carga el param [esp+8] de punto flotante de 32 bits (dword) 
+        fistp dword[num]                ; convierte el valor de punto flotante a entero
+        mov eax, [num]                  ; eax = num
+        add eax, 1                      ; eax + 1
+        mov [num], eax                  ; num = eax
+        mov esp, ebp                    ; esp = ebp
+        pop ebp                         ; Limpia la pila
+        ret                             ; retorno de la funcion
+```
+
+Se ejecutará gdb:
+```bash
+    gdb ./build/result
+    (gdb) break main.c:11
+    (gdb) break add_to_GINI.c:4
+    (gdb) run
+```
+Los break estan definidos en las llamadas a funciones .
+
+Para llamar a nuestro codigo .asm se definió una funcion externa:
+```c
+extern int asm_main(float);
+```
+#### add_to_GINI.c:4 int res = asm_main(n) realiza la llamada al codigo .asm
+![alt text](./img/img6.png)
+#### add_one.asm
+![alt text](./img/img7.png)
+El comando info registers (i r)muestra los valores de todos los registros en ese momento de la ejecución. Proporciona información sobre los registros generales (eax, ebx, etc.), así como los registros de segmento, los registros de estado (eflags) y valor del puntero de instrucción (eip) y el puntero de pila (esp y ebp).
+
+#### Analisis
+- Al entrar en el bloque de ejecucion asm_main:
+    - El registro esp es distinto ebp.
+    - Si observamos esp antes de la llamada es 0xffffcd70, al entrar decrementó en 2 0xffffcd68, lo que significa que a pusheado 8 bytes, debido a que se esta analizando un arq de 32 bits.
+- al avanzar ejecutar el push del ebp y el mov para actualizarlo:
+    - Guardo valor del ebp en la pila.
+    - El registro ebp es igual al esp.
+- Luego se carga el valor pasado por parametro:
+    - Se actualiza el registro eax = 15
+    - Podemos observar que el parametro se encuentra en [ebx+8] = 0x41700000 con lo cual si pasamos este exa a float conseguimos 15.
+
+    ![alt text](./img/img10.png)
+- Se convierte a entero y se le suma uno:
+    - el registri de proposito general ahora es eax = 16
+- Al salir de la funcion:
+    - Limpia la pila, en nuestro caso no hay variables locales.
+- Al realizar el return:
+    - Vemos que el esp apunta al valor de la direccion de retorno.
+    - Observamos que ahora la pila tiene la misma longitud que antes de entrar a la llamada.
