@@ -54,3 +54,6 @@ dkms.conf
 # python
 venv
 *__pycache__*
+
+# execubles
+build
