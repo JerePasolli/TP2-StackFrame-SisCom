@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ -d "./lib" ]; then
-    rm -rf ./lib}
+    rm -rf ./lib
     mkdir ./lib
 else
     mkdir ./lib
