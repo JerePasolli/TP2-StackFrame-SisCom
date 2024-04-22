@@ -40,6 +40,7 @@ Las librerías de Python necesarias son `ctypes`, `imagetk`, `tkinter` y `reques
 $ pip3 install requests
 $ pip3 install tkinter
 $ pip3 install matplotlib
+$ pip3 install msl-ladlib
 $ sudo apt install python3-tk
 $ sudo apt-get install python3-pil python3-pil.imagetk
 ```
@@ -53,7 +54,7 @@ $ ./build.sh
 Una vez compilada la librería de C necesaria, se puede ejecutar el programa con el siguiente comando (desde el directorio raíz del proyecto):
 
 ```bash
-$ python3 ./main.py
+$ python3 ./src/main.py
 ```
 
 ### Ejecución del programa
@@ -78,14 +79,11 @@ En caso de que se ingrese un país del cual no se tienen datos o una cadena de t
 
 ![Gráfico del índice GINI en blanco](./img/img4.png)
 
-### Implementación de código assembler y depuración del programa
-Se realizó un script de bash para compilar nuestro programa con flag de compilacion, para hacer la depuracion se realizo un programa main en c que ejecutará la funcion en c y la implementacion en assembly.
+### Segunda iteración, implementación de función en assembler
+Para esta segunda iteración se implementó un ligero cambio. La función encargada de sumar 1 a cada valor de índice GINI se codificó esta vez en lenguaje assembler, con el objetivo de analizar el comportamiento del stack frame y algunos registros del procesador frente a los llamados entre funciones de distintos lenguajes (para nuestro caso entre lenguaje C y assembler). Este análisis se realizó compilando ambos códigos con información de depuración, para realizar un análisis posterior utilizando GDB.
 
-script para realizar el build:
-```bash
-$ ./build_gdb.sh
-```
-codigo assembly:
+### Código assembly
+
 ```assembly
     section .data                       ; para los datos
         num dd 0                        ; 4 bytes inicializados en 0
@@ -106,41 +104,66 @@ codigo assembly:
         ret                             ; retorno de la funcion
 ```
 
-Se ejecutará gdb:
+### Depuración del programa
+Se realizó un nuevo script de bash para compilar nuestro programa con información de depuración. Para poder hacer la depuracion utilizando GDB (compatible con C y Assembler pero no con Python) se realizó un programa "main.c" sencillo que pide por terminal un valor de índice GINI, para enviarlo luego a la función en Assembler para que lo procese (le sume uno y lo trunque a un valor entero). En resumen, para realizar la depuración, nos abstraímos del código de Python, quedándonos únicamente con código C y Assembler.
+
+Primero se debe ejecutar el script para realizar el build con información de debuging, de la siguiente manera:
+
+```bash
+$ ./build_gdb.sh
+```
+
+Esto generará un archivo "result" en la carpeta build. Con esto se puede ejecutar gdb para debugear el programa:
+
 ```bash
     gdb ./build/result
     (gdb) break main.c:11
     (gdb) break add_to_GINI.c:4
     (gdb) run
 ```
-Los break estan definidos en las llamadas a funciones .
 
-Para llamar a nuestro codigo .asm se definió una funcion externa:
+Con estos comandos se definen distintos breaks en la ejecución, definidos en las llamadas a funciones, que son los puntos críticos en los cuales nos interesa analizar el stack y los registros.
+
+Para llamar a nuestro codigo .asm se definió una funcion externa dentro del código en C:
+
 ```c
 extern int asm_main(float);
 ```
-#### add_to_GINI.c:4 int res = asm_main(n) realiza la llamada al codigo .asm
-![alt text](./img/img6.png)
-#### add_one.asm
-![alt text](./img/img7.png)
-El comando info registers (i r)muestra los valores de todos los registros en ese momento de la ejecución. Proporciona información sobre los registros generales (eax, ebx, etc.), así como los registros de segmento, los registros de estado (eflags) y valor del puntero de instrucción (eip) y el puntero de pila (esp y ebp).
 
-#### Analisis
+#### add_to_GINI.c:4 int res = asm_main(n) realiza la llamada al codigo .asm
+
+![alt text](./img/img6.png)
+
+Como se ve en la imagen, previo a la ejecución de la función assembler, el registro eax contiene un valor desconocido para nosotros, además de que como es de esperar, esp y ebp apuntan a direcciones de memoria distintas. A lo largo de la ejcución de la función assembler veremos como en un primer momento el ebp se iguala al esp, y luego como el esp comienza a decrementar las direcciones de memoria a las que apunta, debido al crecimiento del stack por el llamado a la función.
+
+#### add_one.asm
+
+![alt text](./img/img7.png)
+
+En las imágenes previas podemos ver las capturas de los registros en distintos momentos de la ejecución de la función add_one.asm, como así también luego del retorno de esta.
+
+El comando x/32xw nos muestra 32 posiciones de memoria a partir del valor de ESP, mientras que el comando info registers (i r) muestra los valores de todos los registros del procesador en ese momento de la ejecución. Proporciona información sobre los registros generales (eax, ebx, etc.), así como los registros de segmento, los registros de estado (eflags) y valor del puntero de instrucción (eip) y el puntero de pila (esp y ebp).
+
+#### Análisis
+
 - Al entrar en el bloque de ejecucion asm_main:
     - El registro esp es distinto ebp.
-    - Si observamos esp antes de la llamada es 0xffffcd70, al entrar decrementó en 2 0xffffcd68, lo que significa que a pusheado 8 bytes, debido a que se esta analizando un arq de 32 bits.
-- al avanzar ejecutar el push del ebp y el mov para actualizarlo:
-    - Guardo valor del ebp en la pila.
-    - El registro ebp es igual al esp.
-- Luego se carga el valor pasado por parametro:
+    - Si observamos esp antes de la llamada es 0xffffcd70, al entrar decrementó en 2 (0xffffcd68), lo que significa que a pusheado 8 bytes, debido a que se esta analizando un arq de 32 bits.
+- Al avanzar, se ejecuta el push del ebp y el mov para actualizarlo:
+    - Se Guarda el valor del ebp en la pila.
+    - El registro ebp se iguala al esp.
+- Luego se carga el valor pasado por parametro (en el ejemplo de ejecución en 15):
     - Se actualiza el registro eax = 15
-    - Podemos observar que el parametro se encuentra en [ebx+8] = 0x41700000 con lo cual si pasamos este exa a float conseguimos 15.
+    - Se puede observar que el parámetro que nos interesa se encuentra en [esp+8], que contiene el valor 0x41700000, que si tenemos en cuenta que se trata de un valor de punto flotante, esto equivale al número 15. Esto es así ya que esp apunta a los datos de la función (en este caso la variable num que definimos en Assembler), por lo tanto en esp+4 se tiene la dirección de retorno, y en esp+8 los parámetros que recibe la función, en este caso el índice GINI que se le pasó. Es por eso que el valor del parámetro contenido en esta posición de memoria se carga en la variable num, para luego ser operado en el registro eax.
 
     ![alt text](./img/img10.png)
 - Se convierte a entero y se le suma uno:
-    - el registri de proposito general ahora es eax = 16
+    - el registro de propósito general ahora es eax = 16
 - Al salir de la funcion:
-    - Limpia la pila, en nuestro caso no hay variables locales.
+    - Se limpia la pila, en nuestro caso no hay variables locales.
 - Al realizar el return:
     - Vemos que el esp apunta al valor de la direccion de retorno.
-    - Observamos que ahora la pila tiene la misma longitud que antes de entrar a la llamada.
+    - Observamos que ahora la pila tiene la misma longitud que antes de entrar a la llamada, por lo tanto esp vuelve a incrementar hacia la posición 0xffffcd70.
+
+### Programa final
+Para la versión final del programa, buscando mantener la GUI de Python y también el código en Assembler, utilizamos la librería msl-loadlib, con el objetivo de compatibilziar la función de assembler (compilada para una arquitectura i386 de 32 bits) con el código Python (arquitectura x86 de 64 bits). Esta librería se encarga de compatibilizar ambas arquitecturas utilizando la comunicación entre procesos a través del Sistema operativo (utiliza una arquitectura de cliente servidor local, donde el cliente solicita la función de assembler, para que el servidor la compatibilice con los 64 bits y se la entregue). Gracias a esto conseguimos que el programa final se mantenga en funcionamiento a pesar de las diferencias de funcionamiento internas de cada código particular. A la vista del usuario el funcionamiento es el mismo que en la primera iteración, pero el funcionamiento interno ahora incluye el pequeño algoritmo en Assembler analizado anteriormente.
