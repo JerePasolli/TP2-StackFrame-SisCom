@@ -61,7 +61,7 @@ $ python3 ./src/main.py
 
 El diagrama de secuencia del programa es el siguiente:
 
-![Diagrama de secuencia](./img/img1.jpg)
+![Diagrama de secuencia](./img/img1.png)
 
 Al correr el programa se ejecutará una interfaz gráfica que solictará que ingrese se el país para el cual desee obtener la informacíon del índice GINI, de la siguiente manera:
 
