@@ -1,9 +1,10 @@
-from src.add_to_GINI import add_one_python
+#from src.add_to_GINI import add_one
 import requests
 import matplotlib.pyplot as plt
 from tkinter import *
 from tkinter import ttk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from my_client import MyClient
 
 # ---------------------------- Constantes ------------------------------- #
 
@@ -36,8 +37,9 @@ def consult_and_graphic(event=None):
     x = [item["date"] for item in country_selected]  
     y = [item["value"] for item in country_selected]
 
-    x1 = [item["date"] for item in country_selected]  
-    y1 = [add_one_python(item["value"]) for item in country_selected]
+    c = MyClient()
+    x1 = [item["date"] for item in country_selected] 
+    y1 = [c.add_one(item["value"]) for item in country_selected]
     
     fig, ax = plt.subplots()
     
