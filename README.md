@@ -34,13 +34,13 @@ $ sudo apt install build-essential nasm gcc-multilib g++-multilib
 $ sudo apt install python3
 ```
 
-Las librerías de Python necesarias son `ctypes`, `imagetk`, `tkinter` y `request`. Se pueden instalar de la siguiente manera:
+Las librerías de Python necesarias son `ctypes`, `imagetk`, `tkinter`, `request` y `msl-loadlib`. Se pueden instalar de la siguiente manera:
 
 ```bash
 $ pip3 install requests
 $ pip3 install tkinter
 $ pip3 install matplotlib
-$ pip3 install msl-ladlib
+$ pip3 install msl-loadlib
 $ sudo apt install python3-tk
 $ sudo apt-get install python3-pil python3-pil.imagetk
 ```
